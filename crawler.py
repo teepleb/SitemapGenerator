@@ -1,5 +1,6 @@
 import re
 import urllib.request as req
+import datetime
 
 url_list = []
 starting_url = "https://www.buyandpayhere.com/"
@@ -19,6 +20,8 @@ class URL(object):
 			self.simple_url = "/"
 		self.prev_urls = []
 		self.next_urls = []
+		self.priority = 1.0
+		self.change_frequency = "daily"
 
 
 	def append_prev_url(self, url):
@@ -45,6 +48,7 @@ class Crawler(object):
 			if len(url_list) >= 250:
 				break
 		self.save()
+		Sitemap().build(url_list)
 
 	def crawl(self, u):
 		x = req.urlopen(u.full_url).read().decode('utf-8')
@@ -63,16 +67,21 @@ class Crawler(object):
 			for val in url_list:
 				f.writelines(val.full_url + "\n")
 
-
 class Sitemap(object):
 	def __init__(self):
 		pass
 
 	def build(self, urls):
-		pass
-
-	def save(self):
-		pass
+		with open("sitemap.xml", "w") as f:
+			f.writelines("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">\n")
+			for url in url_list:
+				f.writelines("  <url>\n")
+				f.writelines("    <loc>" + url.full_url + "</loc>\n")
+				f.writelines("    <lastmod>" + datetime.datetime.now().strftime("%Y-%m-%d") + "</lastmod>\n")
+				f.writelines("    <changefreq>" + url.change_frequency + "</changefreq>\n")
+				f.writelines("    <priority>" + str(url.priority) + "</priority>\n")
+				f.writelines("  </url>\n")
+			f.writelines("</urlset>")
 
 	def load(self, file_path):
 		pass
