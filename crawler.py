@@ -38,17 +38,53 @@ class Crawler(object):
 		pass
 
 	def run(self):
-		#gets the initial page URLs
-		x = req.urlopen(starting_url).read().decode('utf-8')
-		for s in re.findall('href="(.*?)"', x, re.S):
-			if s not in url_list:
-				url_list.append(URL(s))
-
+		self.crawl(URL(starting_url))
 		for u in url_list:
 			if u.has_been_crawled == False:
-				crawl()
+				self.crawl(u)
+			if len(url_list) >= 250:
+				break
+		self.save()
 
-	def crawl(self):
+	def crawl(self, u):
+		x = req.urlopen(u.full_url).read().decode('utf-8')
+		for s in re.findall('href="(.*?)"', x, re.S):
+			u.next_urls.append(s)
+			u.has_been_crawled = True
+			if any(sub in s for sub in ('.css', '.js', '#')):
+				continue
+			if starting_url not in s:
+				continue
+			if s not in [url.full_url for url in url_list]:
+				url_list.append(URL(s))
+	
+	def save(self):
+		with open('urls.txt', 'w') as f:
+			for val in url_list:
+				f.writelines(val.full_url + "\n")
+
+
+class Sitemap(object):
+	def __init__(self):
+		pass
+
+	def build(self, urls):
+		pass
+
+	def save(self):
+		pass
+
+	def load(self, file_path):
+		pass
+
+class VisualSitemap(object):
+	def __init__(self):
+		pass
+
+	def build(self, urls):
+		pass
+
+	def save(self):
 		pass
 
 if __name__ == '__main__':
