@@ -3,7 +3,9 @@ import urllib.request as req
 import datetime
 
 url_list = []
-user_settings = {}
+starting_url = ""
+sitemap_xml_file_path = ""
+
 
 class URL(object):
 	def __init__(self, url):
@@ -34,20 +36,22 @@ class Crawler(object):
 		pass
 
 	def run(self):
-		self.load_settings()
-		self.crawl(URL(user_settings["url"]))
-		for u in url_list:
-			if u.has_been_crawled == False:
-				self.crawl(u)
-			if len(url_list) >= 10:
-				break
 
-		if user_settings["list_of_urls"]:
+		starting_url = input("Please enter the website URL you're building a sitemap for: >> ")
+		sitemap_xml_file_path = input("Do you have a current XML sitemap? Please enter the location now (if no Sitemap, just type No): >> ")
+
+		if sitemap_xml_file_path != "No":
+			Sitemap().load(sitemap_xml_file_path)
 			self.save()
-		if user_settings["sitemap"]:
-			Sitemap().build(url_list)
-		if user_settings["visual_sitemap"]:
 			VisualSitemap().build(url_list)
+		else:
+			self.crawl(URL(starting_url))
+			for u in url_list:
+				if u.has_been_crawled == False:
+					self.crawl(u)
+				if len(url_list) >= 10:
+					break
+			self.save()
 
 	def crawl(self, u):
 		x = req.urlopen(u.full_url).read().decode('utf-8')
@@ -65,11 +69,7 @@ class Crawler(object):
 		with open('urls.txt', 'w') as f:
 			for val in url_list:
 				f.writelines(val.full_url + "\n")
-
-	def load_settings(self):
-		with open("settings.cfg", "r") as f:
-			for line in f:
-				user_settings[line.split(" = ")[0]] = line.split(" = ")[1].rstrip()
+	
 
 class Sitemap(object):
 	def __init__(self):
@@ -88,17 +88,28 @@ class Sitemap(object):
 			f.writelines("</urlset>")
 
 	def load(self, file_path):
-		pass
+		with open(file_path, "r") as f:
+			for line in f:
+				if "<loc>" in line:
+					url_list.append(URL(line.strip()[38:-6]))
+		print(url_list)
 
 class VisualSitemap(object):
 	def __init__(self):
-		pass
+		self.prefix_html = "<html><head><title>Website Visual Sitemap</title><link rel=\"stylesheet\" href=\"styles.css\"></head><body>"
+		self.suffix_html = "</body></html>"
+		self.html_string = ""
 
 	def build(self, urls):
-		pass
+		self.html_string = urls
+		self.save()
 
 	def save(self):
-		pass
+		with open("index.html", "w") as f:
+			f.writelines(self.prefix_html)
+			for value in url_list:
+				f.writelines(value.full_url)
+			f.writelines(self.suffix_html)
 
 if __name__ == '__main__':
 	Crawler().run()
