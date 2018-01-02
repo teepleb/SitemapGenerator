@@ -24,4 +24,8 @@ Please note, there is no throttling currently in the program. This will crawl yo
 	- Build From XML Sitemap
 	- Build From TXT File List of URLs
 	- Export to HTML/CSS
-- Throttling/Crawl Speed Management
+- Crawl Speed Limitations
+- User Settings (possible)
+	- Page Speed Limits
+	- Crawl Speed
+	- Folder Limits (Crawl Various Subdirectories)

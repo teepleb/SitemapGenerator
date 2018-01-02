@@ -3,7 +3,7 @@ import urllib.request as req
 import datetime
 
 url_list = []
-starting_url = "https://www.buyandpayhere.com/"
+user_settings = {}
 
 class URL(object):
 	def __init__(self, url):
@@ -23,32 +23,31 @@ class URL(object):
 		self.priority = 1.0
 		self.change_frequency = "daily"
 
-
 	def append_prev_url(self, url):
 		self.prev_urls.append(url)
 
 	def append_next_url(self, url):
 		self.next_urls.append(url)
 
-	def find_index(self, string, delimeter):
-		return string.find(delimeter, string.find(delimeter))
-
-	def find_index_tier(self, string, delimeter, tier):
-		return string.find(delimeter, string.find(delimeter, tier + 1))
-
 class Crawler(object):
 	def __init__(self):
 		pass
 
 	def run(self):
-		self.crawl(URL(starting_url))
+		self.load_settings()
+		self.crawl(URL(user_settings["url"]))
 		for u in url_list:
 			if u.has_been_crawled == False:
 				self.crawl(u)
-			if len(url_list) >= 250:
+			if len(url_list) >= 10:
 				break
-		self.save()
-		Sitemap().build(url_list)
+
+		if user_settings["list_of_urls"]:
+			self.save()
+		if user_settings["sitemap"]:
+			Sitemap().build(url_list)
+		if user_settings["visual_sitemap"]:
+			VisualSitemap().build(url_list)
 
 	def crawl(self, u):
 		x = req.urlopen(u.full_url).read().decode('utf-8')
@@ -57,7 +56,7 @@ class Crawler(object):
 			u.has_been_crawled = True
 			if any(sub in s for sub in ('.css', '.js', '#')):
 				continue
-			if starting_url not in s:
+			if user_settings["url"] not in s:
 				continue
 			if s not in [url.full_url for url in url_list]:
 				url_list.append(URL(s))
@@ -66,6 +65,11 @@ class Crawler(object):
 		with open('urls.txt', 'w') as f:
 			for val in url_list:
 				f.writelines(val.full_url + "\n")
+
+	def load_settings(self):
+		with open("settings.cfg", "r") as f:
+			for line in f:
+				user_settings[line.split(" = ")[0]] = line.split(" = ")[1].rstrip()
 
 class Sitemap(object):
 	def __init__(self):
