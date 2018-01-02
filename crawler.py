@@ -36,10 +36,6 @@ class Crawler(object):
 		pass
 
 	def run(self):
-
-		starting_url = input("Please enter the website URL you're building a sitemap for: >> ")
-		sitemap_xml_file_path = input("Do you have a current XML sitemap? Please enter the location now (if no Sitemap, just type No): >> ")
-
 		if sitemap_xml_file_path != "No":
 			Sitemap().load(sitemap_xml_file_path)
 			self.save()
@@ -52,15 +48,17 @@ class Crawler(object):
 				if len(url_list) >= 10:
 					break
 			self.save()
+			Sitemap().build(url_list)
+			VisualSitemap().build(url_list)
 
 	def crawl(self, u):
 		x = req.urlopen(u.full_url).read().decode('utf-8')
 		for s in re.findall('href="(.*?)"', x, re.S):
 			u.next_urls.append(s)
 			u.has_been_crawled = True
-			if any(sub in s for sub in ('.css', '.js', '#')):
+			if any(sub in s for sub in ('.css', '.js', '#', '?', 'javascript')):
 				continue
-			if user_settings["url"] not in s:
+			if starting_url not in s:
 				continue
 			if s not in [url.full_url for url in url_list]:
 				url_list.append(URL(s))
@@ -91,8 +89,7 @@ class Sitemap(object):
 		with open(file_path, "r") as f:
 			for line in f:
 				if "<loc>" in line:
-					url_list.append(URL(line.strip()[38:-6]))
-		print(url_list)
+					url_list.append(URL(line.strip()[5:-6]))
 
 class VisualSitemap(object):
 	def __init__(self):
@@ -108,8 +105,10 @@ class VisualSitemap(object):
 		with open("index.html", "w") as f:
 			f.writelines(self.prefix_html)
 			for value in url_list:
-				f.writelines(value.full_url)
+				f.writelines("<p>{0}</p>".format(value.full_url))
 			f.writelines(self.suffix_html)
 
 if __name__ == '__main__':
+	starting_url = input("Please enter the website URL you're building a sitemap for: >> ")
+	sitemap_xml_file_path = input("Do you have a current XML sitemap? Please enter the location now (if no Sitemap, just type No): >> ")
 	Crawler().run()
