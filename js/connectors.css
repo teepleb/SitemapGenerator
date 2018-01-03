@@ -1,0 +1,23 @@
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blockquote,th,td { margin:0; padding:0; }
+
+
+body { background: #fff; font-family: "Droid Serif",Georgia,"Times New Roman",Times,serif; color: #444444; }
+
+.node { font-size: 11px; }
+
+.node.treemap {
+	cursor: pointer;
+	padding: 0 2px;
+	min-width: 60px;
+	text-align: center;
+	height: 30px;
+	border: 2px solid #E8E8E3; 
+	border-radius: 2px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.5);
+	background: #fff; 
+}
+
+.node.treemap .node-name {
+	line-height: 30px;
+	color: #9B9B9B;
+}
