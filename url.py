@@ -1,12 +1,15 @@
 import datetime
 import global_vars
 
-
 class URL(object):
 	def __init__(self, url):
 		# grab the url to save a couple versions (if need)
 		self.complete_url = url
 		self.clean_url = url.replace(global_vars.starting_url, "/")
+
+		#verify there is a trailing slash at the end of the url
+		if self.clean_url[-1:] != "/":
+			self.clean_url += "/"
 
 		# general variables just for storing/data purposes (they may never be used but might later on)
 		self.crawl_depth = self.clean_url.count("/") - 1
@@ -21,20 +24,29 @@ class URL(object):
 		else:
 			self.parent = "/"
 
-		if self.parent not in global_vars.parent_urls:
+		if self.parent not in global_vars.parent_urls and self.parent != "/":
 			global_vars.parent_urls.append(self.parent)
 
 		# boolean to test if the URL has been crawled, this stops redundant looping and saves resources
 		self.has_been_crawled = False
 
+		self.add_to_tree(self.clean_url.replace(self.parent, "/"))
+
 	# builds parent URL for reference later on in tree
 	def get_parent(self, url):
 		if url.count("/") == 2:
-			return self.clean_url
+			return url
 		else:
 			temp = url.split("/")[1:-2]
 			temp = "/" + "/".join(temp) + "/"
 		return temp
+
+	# adds to parent/child relationship tree
+	def add_to_tree(self, url):
+		if self.parent not in global_vars.url_tree.keys():
+			global_vars.url_tree[self.parent] = []
+		else:
+			global_vars.url_tree[self.parent].append(url)
 
 	# future function to load urls into data structures via a TXT file
 	def load(self):

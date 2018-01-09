@@ -66,58 +66,64 @@ class VisualSitemap(object):
 
         """
         js_nodes = ""
-        count = 0
-        for parent_url in global_vars.parent_urls:
-            print(parent_url)
-            if parent_url == "/":
-                continue
+        parent_url_count = 1
+        parent_url_length = len(global_vars.url_tree)
+        for parent_url in global_vars.url_tree:
+            if parent_url_count == parent_url_length:
+                js_nodes += "       {\n" \
+                                    "           text: { name: \"" + parent_url + "\" },\n" \
+                                    "           stackChildren: true,\n" \
+                                    "           connectors: {\n" \
+                                    "               style: {\n" \
+                                    "                   'arrow-end': 'block-wide-long'\n" \
+                                    "               }\n" \
+                                    "           }"
+
+                # need to plan children
+                if len(global_vars.url_tree[parent_url]) > 0:
+                    child_url_length = len(global_vars.url_tree[parent_url])
+                    child_url_count = 1
+                    js_nodes += ",\n           children: [\n"
+                    for child_url in global_vars.url_tree[parent_url]:
+                        if child_url_count == child_url_length:
+                            js_nodes += "           { \n" \
+                                    "text: { name: \"" + child_url + "\" } }"
+                        else:
+                            js_nodes += "{ " \
+                                    "text: { name: \"" + child_url + "\" } },"
+                            child_url_count += 1
+
+                    js_nodes += "]\n"
+                js_nodes += "}\n"
             else:
                 js_nodes += "       {\n" \
-                                "           text: { name: \"" + parent_url + "\" },\n" \
-                                "           stackChildren: true,\n" \
-                                "           connectors: {\n" \
-                                "               style: {\n" \
-                                "                   'arrow-end': 'block-wide-long'\n" \
-                                "               }\n" \
-                                "           } \n"
+                                    "           text: { name: \"" + parent_url + "\" },\n" \
+                                    "           stackChildren: true,\n" \
+                                    "           connectors: {\n" \
+                                    "               style: {\n" \
+                                    "                   'arrow-end': 'block-wide-long'\n" \
+                                    "               }\n" \
+                                    "           }"
 
-            # need to plan children
-             
-            js_nodes += "},\n"
+                # need to plan children
+                if len(global_vars.url_tree[parent_url]) > 0:
+                    child_url_length = len(global_vars.url_tree[parent_url])
+                    child_url_count = 1
+                    js_nodes += ",\n           children: [ \n"
+                    for child_url in global_vars.url_tree[parent_url]:
+                        if child_url_count == child_url_length:
+                            js_nodes += "           { \n" \
+                                    "text: { name: \"" + child_url + "\" } }"
+                        else:
+                            js_nodes += "{ " \
+                                    "text: { name: \"" + child_url + "\" } },"
+                            child_url_count += 1
 
-        """for key, values in urls_to_display.items():
-            if len([x for x in values if x]) > 1:
-                js_nodes += "{\n" \
-                            "           text: { name: \"" + key + "\" },\n" \
-                            "           stackChildren: true,\n" \
-                            "           connectors: {\n" \
-                            "               style: {\n" \
-                            "                   'arrow-end': 'block-wide-long'\n" \
-                            "               }\n" \
-                            "           },\n" \
-                            "           children: [\n"
-                for child_key, child_values in urls_to_display[key].items():
-                    if count == len(urls_to_display[key].items()):
-                        js_nodes += "{" \
-                                    "               text: { name: \"" + child_key + "\" } }\n"
-                    else:
-                        js_nodes += "{" \
-                                    "               text: { name: \"" + child_key + "\"} },\n"
-                    count += 1
-
-                js_nodes += js_nodes[:-1] + "}],\n"
-                count = 0
-            else:
-                js_nodes += "{\n" \
-                            "           text: { name: \"" + key + "\" },\n" \
-                            "           stackChildren: true,\n" \
-                            "           connectors: {\n" \
-                            "               style: {\n" \
-                            "                   'arrow-end': 'block-wide-long'\n" \
-                            "               }\n" \
-                            "           }\n" \
-                            " },\n"
-                            """
+                    js_nodes += "]\n"
+                
+                js_nodes += "},\n"
+                
+                parent_url_count += 1
 
         js_suffix = "] }\n};\nnew Treant( chart_config );\n" 
         self.js_string = js_prefix + js_nodes + js_suffix
