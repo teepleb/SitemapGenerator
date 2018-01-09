@@ -3,36 +3,14 @@ import urllib.request as req
 import datetime
 import webbrowser
 import os
+import constants
+from url import URL
 
 url_list = []
-starting_url = ""
-sitemap_xml_file_path = ""
 parent_urls = []
 parent_filter = ""
 children_temp = []
 longest_url_count = 3
-
-class URL(object):
-    def __init__(self, url):
-        self.full_url = url
-        self.simple_url = url
-        self.parent_url = None
-        self.has_been_crawled = False
-        if url.count("/") > 4:
-            indices = [s.start() for s in re.finditer("/", url)]
-            self.parent_url = url[indices[2]: indices[url.count("/") - 1]]
-            if url[indices[2]: indices[url.count("/") - 1]] not in parent_urls:
-                parent_urls.append(url[indices[2]: indices[url.count("/") - 1]])
-        elif url.count("/") == 3:
-            self.parent_url = "/"
-        else:
-            indices = [s.start() for s in re.finditer("/", url)]
-            if url[indices[url.count("/") - 2]: indices[url.count("/") - 1]] not in parent_urls:
-                parent_urls.append(url[indices[url.count("/") - 2]: indices[url.count("/") - 1]])
-            self.parent_url = url[indices[url.count("/") - 2]: indices[url.count("/") - 1]]
-
-        self.priority = 1.0
-        self.change_frequency = "daily"
 
 
 class Crawler(object):
@@ -40,13 +18,13 @@ class Crawler(object):
         pass
 
     def run(self):
-        if sitemap_xml_file_path != "No":
-            Sitemap().load(sitemap_xml_file_path)
+        if constants.sitemap_xml_file_path != "No":
+            Sitemap().load(constants.sitemap_xml_file_path)
             self.save()
             self.build_children()
             VisualSitemap().build(url_list)
         else:
-            self.crawl(URL(starting_url))
+            self.crawl(URL(constants.starting_url))
             for u in url_list:
                 if u.count("/") > longest_url_count:
                     longest_url_count = u.count("/")
@@ -60,20 +38,20 @@ class Crawler(object):
             VisualSitemap().build(url_list)
 
     def crawl(self, u):
-        x = req.urlopen(u.full_url).read().decode('utf-8')
+        x = req.urlopen(u.complete_url).read().decode('utf-8')
         for s in re.findall('href="(.*?)"', x, re.S):
             u.has_been_crawled = True
             if any(sub in s for sub in ('.css', '.js', '#', '?', 'javascript')):
                 continue
-            if starting_url not in s:
+            if constants.starting_url not in s:
                 continue
-            if s not in [url.full_url for url in url_list]:
+            if s not in [url.complete_url for url in url_list]:
                 url_list.append(URL(s))
 
     def save(self):
         with open('urls.txt', 'w') as f:
             for val in url_list:
-                f.writelines(val.full_url + "\n")
+                f.writelines(val.complete_url + "\n")
 
     def build_children(self):
         pass
@@ -88,7 +66,7 @@ class Sitemap(object):
             f.writelines("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">\n")
             for url in url_list:
                 f.writelines("  <url>\n")
-                f.writelines("    <loc>" + url.full_url + "</loc>\n")
+                f.writelines("    <loc>" + url.complete_url + "</loc>\n")
                 f.writelines("    <lastmod>" + datetime.datetime.now().strftime("%Y-%m-%d") + "</lastmod>\n")
                 f.writelines("    <changefreq>" + url.change_frequency + "</changefreq>\n")
                 f.writelines("    <priority>" + str(url.priority) + "</priority>\n")
@@ -191,6 +169,6 @@ class VisualSitemap(object):
 
 
 if __name__ == '__main__':
-    starting_url = input("Please enter the website URL you're building a sitemap for: >> ")
-    sitemap_xml_file_path = input("Do you have a current XML sitemap? Please enter the location now (if no Sitemap, just type No): >> ")
+    constants.starting_url = input("Please enter the website URL you're building a sitemap for: >> ")
+    constants.sitemap_xml_file_path = input("Do you have a current XML sitemap? Please enter the location now (if no Sitemap, just type No): >> ")
     Crawler().run()
