@@ -21,7 +21,7 @@ class Crawler(object):
             for u in global_vars.url_list:
                 if not u.has_been_crawled:
                     self.crawl(u)
-                if len(global_vars.url_list) >= 50:
+                if len(global_vars.url_list) >= 25:
                     break
             self.save()
             Sitemap().build()

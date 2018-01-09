@@ -13,6 +13,10 @@ class URL(object):
 
 		# general variables just for storing/data purposes (they may never be used but might later on)
 		self.crawl_depth = self.clean_url.count("/") - 1
+
+		if self.crawl_depth > global_vars.crawl_depth:
+			global_vars.crawl_depth = self.crawl_depth
+
 		self.priority = 1.0
 		self.change_frequency = "daily"
 		self.last_modified = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -30,23 +34,31 @@ class URL(object):
 		# boolean to test if the URL has been crawled, this stops redundant looping and saves resources
 		self.has_been_crawled = False
 
-		self.add_to_tree(self.clean_url.replace(self.parent, "/"))
+		self.add_to_tree(self.clean_url)
 
 	# builds parent URL for reference later on in tree
 	def get_parent(self, url):
 		if url.count("/") == 2:
 			return url
+		elif url.count("/") > 2:
+			self.add_to_tree_parent_known(url, url.split("/"))
+			temp = url.split("/")[1:-2]
+			temp = "/" + "/".join(temp) + "/"
+			return temp
 		else:
 			temp = url.split("/")[1:-2]
 			temp = "/" + "/".join(temp) + "/"
-		return temp
+			return temp
 
 	# adds to parent/child relationship tree
 	def add_to_tree(self, url):
 		if self.parent not in global_vars.url_tree.keys():
 			global_vars.url_tree[self.parent] = []
-		else:
-			global_vars.url_tree[self.parent].append(url)
+		else:			
+			global_vars.url_tree[self.parent].append(url.replace(self.parent, "/"))
+
+	def add_to_tree_parent_known(self, url, parent):
+		print("URL: {0} - Parent: {1}".format(url, parent))
 
 	# future function to load urls into data structures via a TXT file
 	def load(self):

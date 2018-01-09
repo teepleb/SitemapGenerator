@@ -20,8 +20,6 @@ class VisualSitemap(object):
                             "        chart: {\n" \
                             "            container: \"#treemap-chart\",\n" \
                             "            levelSeparation: 25,\n" \
-                            "            rootOrientation: \"WEST\",\n" \
-                            "            nodeAlign: \"BOTTOM\",\n" \
                             "            connectors: {" \
                             "                type: \"step\",\n" \
                             "                style: {" \
@@ -33,7 +31,7 @@ class VisualSitemap(object):
                             "            }\n" \
                             "       },\n" \
                             "       nodeStructure: {" \
-                            "           text: { name: \"Homepage ( / )\" },\n" \
+                            "           text: { name: \"" + global_vars.starting_url + "\" },\n" \
                             "           connectors: {" \
                             "               style: {\n" \
                             "                   'stroke': '#bbb',\n" \
@@ -41,34 +39,12 @@ class VisualSitemap(object):
                             "               }\n" \
                             "           },\n" \
                             "       children: [\n"
-
-        # parent
-        """
-
-                    {
-                        text: { name: "dealers/" },
-                        stackChildren: true,
-                        connectors: {
-                            style: {
-                                'stroke': '#8080FF',
-                                'arrow-end': 'block-wide-long'
-                            }
-                        },
-                        children: [
-                            {
-                                text: {name: "dealers/west_virginia/"}
-                            },
-                            {
-                                text: {name: "dealers/michigan/"}
-                            }
-                        ]
-                    },
-
-        """
         js_nodes = ""
         parent_url_count = 1
         parent_url_length = len(global_vars.url_tree)
-        for parent_url in global_vars.url_tree:
+        for parent_url in sorted(global_vars.url_tree):
+            if parent_url == "/":
+                continue
             if parent_url_count == parent_url_length:
                 js_nodes += "       {\n" \
                                     "           text: { name: \"" + parent_url + "\" },\n" \
@@ -79,15 +55,23 @@ class VisualSitemap(object):
                                     "               }\n" \
                                     "           }"
 
-                # need to plan children
                 if len(global_vars.url_tree[parent_url]) > 0:
                     child_url_length = len(global_vars.url_tree[parent_url])
+                    if child_url_length > 5:
+                        child_url_length = 5
                     child_url_count = 1
                     js_nodes += ",\n           children: [\n"
                     for child_url in global_vars.url_tree[parent_url]:
                         if child_url_count == child_url_length:
-                            js_nodes += "           { \n" \
-                                    "text: { name: \"" + child_url + "\" } }"
+                            if child_url_length < 5:
+                                js_nodes += "           { \n" \
+                                        "text: { name: \"" + child_url + "\" } }"
+                            else:
+                                js_nodes += "           { \n" \
+                                        "text: { name: \"" + child_url + "\" } },"
+                                js_nodes += "           { \n" \
+                                        "text: { name: \"..." + str(len(global_vars.url_tree[parent_url]) - child_url_length) + " more pages \" } }"
+                            break
                         else:
                             js_nodes += "{ " \
                                     "text: { name: \"" + child_url + "\" } },"
@@ -108,12 +92,21 @@ class VisualSitemap(object):
                 # need to plan children
                 if len(global_vars.url_tree[parent_url]) > 0:
                     child_url_length = len(global_vars.url_tree[parent_url])
+                    if child_url_length > 5:
+                        child_url_length = 5
                     child_url_count = 1
                     js_nodes += ",\n           children: [ \n"
-                    for child_url in global_vars.url_tree[parent_url]:
+                    for child_url in sorted(global_vars.url_tree[parent_url]):
                         if child_url_count == child_url_length:
-                            js_nodes += "           { \n" \
-                                    "text: { name: \"" + child_url + "\" } }"
+                            if child_url_length < 5:
+                                js_nodes += "           { \n" \
+                                        "text: { name: \"" + child_url + "\" } }"
+                            else:
+                                js_nodes += "           { \n" \
+                                        "text: { name: \"" + child_url + "\" } },"
+                                js_nodes += "           { \n" \
+                                        "text: { name: \"..." + str(len(global_vars.url_tree[parent_url]) - child_url_length) + " more pages \" } }"
+                            break
                         else:
                             js_nodes += "{ " \
                                     "text: { name: \"" + child_url + "\" } },"
