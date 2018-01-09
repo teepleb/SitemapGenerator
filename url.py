@@ -19,6 +19,9 @@ class URL(object):
 		# lets find the parent URL using our cleaned up URL for crawl depth
 		self.parent = self.get_parent(self.clean_url)
 
+		if self.parent not in global_vars.parent_urls:
+			global_vars.parent_urls.append(self.parent)
+
 		# boolean to test if the URL has been crawled, this stops redundant looping and saves resources
 		self.has_been_crawled = False
 
