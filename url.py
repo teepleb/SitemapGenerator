@@ -1,7 +1,7 @@
 import datetime
-import constants
+import global_vars
 
-starting_url = constants.starting_url
+starting_url = global_vars.starting_url
 
 class URL(object):
 	def __init__(self, url):
@@ -28,11 +28,6 @@ class URL(object):
 		temp = "/" + "/".join(temp) + "/"
 		return temp
 
+	# future function to load urls into data structures via a TXT file
 	def load(self):
 		pass
-
-
-if __name__ == '__main__':
-	with open("urls.txt", "r") as f:
-		for line in f:
-			u = URL(line.strip())
