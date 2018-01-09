@@ -21,7 +21,7 @@ class Crawler(object):
             for u in global_vars.url_list:
                 if not u.has_been_crawled:
                     self.crawl(u)
-                if len(global_vars.url_list) >= 10:
+                if len(global_vars.url_list) >= 50:
                     break
             self.save()
             Sitemap().build()
@@ -46,9 +46,3 @@ class Crawler(object):
 
     def build_children(self):
         pass
-
-
-if __name__ == '__main__':
-    global_vars.starting_url = input("Please enter the website URL you're building a sitemap for: >> ")
-    global_vars.sitemap_xml_file_path = input("Do you have a current XML sitemap? Please enter the location now (if no Sitemap, just type No): >> ")
-    Crawler().run()
