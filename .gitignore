@@ -1,0 +1,5 @@
+urls.txt
+sitemap.xml
+index.html
+docs/*
+__pycache__/*.pyc
